@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         // 调用后端 API 获取 Markdown 内容
-        const response = await fetch(`${publicConfig.backendApiUrl}/crawl-url?url=${url}&format=markdown`, {
+        const response = await fetch(`${publicConfig.backendApiUrl}/crawl-url?url=${url}`, {
             method: "GET"
         })
 
@@ -23,15 +23,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             throw new Error(`后端API返回错误: ${response.status}`)
         }
 
-        const data = await response.json()
+        const data = await response.text()
 
-        if (!data.markdown) {
+        if (!data) {
             throw new Error("未能获取Markdown内容")
         }
 
         // 设置响应头为 Markdown 类型
         res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
-        res.status(200).send(data.markdown)
+        res.status(200).send(data)
     } catch (error) {
         console.error("提取内容失败:", error)
         res.status(500).json({ error: "提取内容失败，请稍后再试" })
