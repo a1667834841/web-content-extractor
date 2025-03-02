@@ -28,7 +28,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <title>网页内容提取器 - 快速提取网页内容</title>
         <meta name="description" content="网页内容提取器 - 快速提取网页内容，支持HTML和Markdown格式" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/crawler_favicon.ico" />
       </Head>
       <Toaster richColors position="top-center" />
       <Component {...pageProps} />

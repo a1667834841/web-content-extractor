@@ -23,8 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    console.log("提取内容", url)
-    console.log("提取内容", host)
+    console.log("提取内容url", url)
+    console.log("提取内容host", host)
     // 这里是示例实现，实际项目中需要替换为真实的网页内容提取逻辑
     const response = await fetch(host, {
       method: "POST",
@@ -33,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       },
       body: JSON.stringify({ "url": url }),
     })
-    debugger
     const result = await response.json()
 
     res.status(200).json({

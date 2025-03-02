@@ -20,11 +20,12 @@ import {
   Eye,
   Lock,
   Github,
-  Twitter,
+  Hand,
   Facebook,
   PhoneIcon as Wechat,
   Mail,
   ArrowUp,
+  Clock,
 } from "lucide-react"
 import { toast } from "sonner"
 import { publicConfig, isDevelopment } from "../lib/config"
@@ -35,6 +36,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("html")
   const [url, setUrl] = useState("")
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
+  const [comsumeTime, setComsumeTime] = useState(0)
   const [markdown, setMarkdown] = useState(`# 示例Markdown内容
 这里将显示提取的Markdown内容
 
@@ -59,6 +61,39 @@ export default function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [contentHeight, setContentHeight] = useState("32rem")
   const contentRef = useRef<HTMLDivElement>(null)
+  // 轮播图集合
+  const carouselImages = [
+    {title: "1. 输入想要提取内容的网页地址，点击提取按钮", desc: "在输入框中粘贴或输入网址，支持大部分网页", image: "/desc1.png"},
+    {title: "2. 等待片刻即可获取提取结果", desc: "复制或下载提取结果，支持HTML和Markdown格式", image: "/desc2.png"},
+    {title: "3. 支持API接口", desc: "支持API接口，可以快速提取网页内容", image: "/desc3.png"},
+  ]
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  // 添加轮播图自动切换功能
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length)
+    }, 5000) // 每5秒切换一次
+    
+    return () => clearInterval(interval) // 清理定时器
+  }, [carouselImages.length])
+  
+  // 切换到下一张图片
+  const nextSlide = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length)
+  }
+  
+  // 切换到上一张图片
+  const prevSlide = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? carouselImages.length - 1 : prevIndex - 1
+    )
+  }
+  
+  // 直接跳转到指定图片
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index)
+  }
 
   // 监听滚动事件，控制导航栏显示/隐藏和回到顶部按钮
   useEffect(() => {
@@ -187,6 +222,7 @@ export default function Home() {
   }
 
   const handleExtract = async (url: string, format: string) => {
+    const startTime = performance.now()
     setLoading(true)
     try {
       
@@ -212,6 +248,9 @@ export default function Home() {
 
       setHtml(data.html || "")
       setMarkdown(data.markdown || "")
+      const endTime = performance.now()
+      const timeTaken = endTime - startTime
+      setComsumeTime(timeTaken)
     } catch (error) {
       toast.error("提取失败，请联系管理员");
     } finally {
@@ -257,13 +296,30 @@ export default function Home() {
                 </Link>
               </div>
               <nav className="hidden md:flex space-x-8">
-                {/* <Link
-                  href="/"
+                <Link
+                  href="#features"
                   className="text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
                 >
-                  首页
-                </Link> */}
-          
+                  功能介绍
+                </Link>
+                <Link
+                  href="#tutorial"
+                  className="text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
+                >
+                  使用教程
+                </Link>
+                <Link
+                  href="#api"
+                  className="text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
+                >
+                  API接口
+                </Link>
+                <Link
+                  href="#faq"
+                  className="text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
+                >
+                  常见问题
+                </Link>
               </nav>
               <div className="flex items-center space-x-4">
                 <button
@@ -284,7 +340,7 @@ export default function Home() {
         </header>
 
         <main>
-          {/* 轮播图/Hero Section */}
+          {/* Hero Section */}
           <section className="py-12 sm:py-16 lg:py-20 text-center">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
@@ -295,31 +351,38 @@ export default function Home() {
               </p>
               <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-10">
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                  <div className="relative flex-grow">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <LinkIcon className="h-5 w-5 text-gray-400" />
+                  <div className="flex flex-col sm:flex-row w-full gap-4">
+                    <div className="relative w-full sm:w-1/2">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <LinkIcon className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="请输入网址 (例如: https://www.baidu.com)"
+                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                      />
                     </div>
-                    <input
-                      type="text"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      placeholder="请输入网址 (例如: https://www.baidu.com)"
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <div className="flex flex-row w-full sm:w-1/2 space-x-2">
+                      <button className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out transform active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-700 text-base sm:text-base text-sm ${loading ? "opacity-50 cursor-not-allowed" : ""}`} onClick={() => handleExtract(url, activeTab)}>
+                        <div className="flex items-center justify-center">
+                          <Hand className="h-5 w-5 mr-2" />
+                          <span>提取内容</span>
+                        </div>
+                      </button>
+                      <button className="flex-1 px-3 sm:px-6 py-2 sm:py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-white border border-gray-300 dark:border-gray-600 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out flex items-center justify-center active:bg-gray-50 dark:active:bg-gray-600 active:scale-95 hover:bg-gray-50 dark:hover:bg-gray-600 text-base sm:text-base text-sm" onClick={copyLink}>
+                        <LinkIcon className="h-5 w-5 mr-2" />
+                        快捷链接
+                      </button>
+                    </div>
                   </div>
-                  <button className={`w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out transform hover:scale-105 ${loading ? "opacity-50 cursor-not-allowed" : ""}`} onClick={() => handleExtract(url, activeTab)}>
-                    提取内容
-                  </button>
-                  <button className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-white border border-gray-300 dark:border-gray-600 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out flex items-center justify-center" onClick={copyLink}>
-                    <LinkIcon className="h-5 w-5 mr-2" />
-                    快捷链接
-                  </button>
                 </div>
               </div>
 
               {/* 提取结果预览 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto" ref={contentRef}>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                   <div className="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <div className="flex space-x-2 mr-4">
                       <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -328,6 +391,7 @@ export default function Home() {
                     </div>
                     <div className="flex-1 text-center font-medium">HTML</div>
                     <div className="flex space-x-2">
+                      {comsumeTime > 0 && <span className="text-gray-500 dark:text-gray-400 text-sm">耗时: {(comsumeTime/1000).toFixed(2)}秒</span>}
                       <button 
                         onClick={copyHtml}
                         className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -344,7 +408,7 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                  <div className="h-96 md:h-auto bg-gray-50 dark:bg-gray-900 p-4 overflow-auto" style={{ height: contentHeight }}>
+                  <div className="bg-gray-50 dark:bg-gray-900 p-4 overflow-auto" style={{ height: contentHeight }}>
                     <pre className="text-sm text-gray-800 dark:text-gray-200 text-left">
                       {html}
                     </pre>
@@ -419,6 +483,65 @@ export default function Home() {
                 </p>
               </div>
 
+                            {/* 效果轮播展示 */}
+                            <div className="relative max-w-4xl mx-auto mb-16">
+                <div className="overflow-hidden rounded-xl shadow-lg bg-gray-100 dark:bg-gray-700">
+                  {/* 轮播图片 */}
+                  <div className="relative w-full" style={{ height: "500px" }}>
+                    {carouselImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className={`absolute w-full h-full transition-opacity duration-500 flex items-center justify-center ${
+                          index === currentImageIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        }`}
+                      >
+                        <img
+                          src={image.image}
+                          alt={image.title}
+                          className="max-w-full max-h-[400px] object-contain shadow-md"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-4">
+                          <h3 className="text-xl font-bold mb-2">{image.title}</h3>
+                          <p>{image.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 轮播控制按钮 */}
+                  <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-3 z-10">
+                    {carouselImages.map((_, index) => (
+                      <button 
+                        key={index}
+                        onClick={() => goToSlide(index)}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          index === currentImageIndex 
+                            ? 'bg-white scale-125' 
+                            : 'bg-white opacity-50 hover:opacity-75'
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* 左右箭头 */}
+                  <button 
+                    onClick={prevSlide}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+                    aria-label="Previous slide"
+                  >
+                    <ChevronDown className="w-6 h-6 rotate-90" />
+                  </button>
+                  <button 
+                    onClick={nextSlide}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+                    aria-label="Next slide"
+                  >
+                    <ChevronDown className="w-6 h-6 -rotate-90" />
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {/* 功能卡片1 */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
@@ -482,14 +605,6 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* 视频教程 */}
-              <div className="max-w-4xl mx-auto mb-16 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                <div className="aspect-w-16 aspect-h-9">
-                  <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <p className="text-gray-500 dark:text-gray-400">教程视频预览</p>
-                  </div>
-                </div>
-              </div>
 
               {/* 图文教程 */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -515,7 +630,6 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                   <div className="p-1 bg-blue-500 text-white text-center font-bold">步骤 3</div>
                   <div className="p-6">
-  
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">选择输出格式</h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       选择您需要的输出格式，HTML或Markdown，满足不同需求
@@ -527,9 +641,110 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                   <div className="p-1 bg-blue-500 text-white text-center font-bold">步骤 4</div>
                   <div className="p-6">
- 
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">下载或复制结果</h3>
                     <p className="text-gray-600 dark:text-gray-300">下载或复制提取结果，方便您进一步编辑或分享使用</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* API接口介绍 */}
+          <section id="api" className="py-16 bg-white dark:bg-gray-800">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">API 接口</h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                  直接通过 API 获取转换好的 Markdown 内容，无需前端页面，适合开发者集成
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* 左侧：API 文档 */}
+                <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 h-full">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">快速接口</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    只需一个 GET 请求，即可获取任意网页的 Markdown 内容，响应时间约 5 秒。
+                  </p>
+                  
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-4 mb-4 overflow-x-auto">
+                    <code className="text-sm text-blue-600 dark:text-blue-400">
+                      GET {publicConfig.frontendApiUrl}/crawl?url=https://example.com
+                    </code>
+                  </div>
+                  
+                  <h4 className="font-semibold text-gray-900 dark:text-white mt-6 mb-2">参数说明</h4>
+                  <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
+                    <li><code className="text-blue-600 dark:text-blue-400">url</code>: 需要提取内容的网页地址（必填）</li>
+                  </ul>
+                  
+                  <h4 className="font-semibold text-gray-900 dark:text-white mt-6 mb-2">响应格式</h4>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">
+                    直接返回 Markdown 文本内容，Content-Type 为 text/markdown
+                  </p>
+                  
+                  <h4 className="font-semibold text-gray-900 dark:text-white mt-6 mb-2">使用示例</h4>
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-4 overflow-x-auto">
+                    <pre className="text-sm text-gray-800 dark:text-gray-200">
+{`// JavaScript 示例
+fetch("${publicConfig.frontendApiUrl}/crawl?url=https://example.com")
+  .then(response => response.text())
+  .then(markdown => console.log(markdown))
+  .catch(error => console.error(error));
+
+// cURL 示例
+curl "${publicConfig.frontendApiUrl}/crawl?url=https://example.com" > content.md`}
+                    </pre>
+                  </div>
+                </div>
+                
+                {/* 右侧：API 使用示例图 */}
+                <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden h-full">
+                  <div className="p-1 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 flex items-center">
+                    <div className="flex space-x-1.5 ml-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">API 调用示例</div>
+                  </div>
+                  <div className="p-4 flex flex-col h-[calc(100%-2.5rem)]">
+                    <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-md overflow-hidden">
+                      <div className="p-4 flex flex-col h-full">
+                        <div className="flex items-center mb-4 bg-gray-100 dark:bg-gray-700 rounded p-2">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300 font-mono overflow-x-auto whitespace-nowrap">
+                            GET {publicConfig.frontendApiUrl}/crawl?url=https://example.com
+                          </div>
+                        </div>
+                        <div className="flex-1 bg-white dark:bg-gray-800 rounded p-2 overflow-y-auto">
+                          <div className="text-xs text-gray-800 dark:text-gray-200 font-mono">
+                            # Example Domain<br /><br />
+                            This domain is for use in illustrative examples in documents.<br /><br />
+                            ## Information<br /><br />
+                            You may use this domain in literature without prior coordination or asking for permission.<br /><br />
+                            [More information...](https://www.iana.org/domains/example)
+                          </div>
+                        </div>
+                        <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+                          响应时间: 0.8s | 内容大小: 218 bytes
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">直接获取 Markdown 内容</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">支持任意网页 URL</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">自动处理编码和格式</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -622,6 +837,26 @@ export default function Home() {
                     <div className="mt-2 p-5 bg-gray-50 dark:bg-gray-600 rounded-lg">
                       <p className="text-gray-600 dark:text-gray-300">
                         不需要。我们的工具完全免费使用，无需注册账号。您可以直接访问我们的网站，输入网址并提取内容，没有任何使用限制。这样设计是为了让您能够快速、方便地使用我们的工具，无需繁琐的注册流程。
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 问题5 */}
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleFaq(4)}
+                    className="w-full flex items-center justify-between p-5 bg-white dark:bg-gray-700 rounded-lg shadow hover:shadow-md transition-all duration-200"
+                  >
+                    <span className="text-lg font-medium text-gray-900 dark:text-white">是否会收费？</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${expandedFaq === 4 ? "transform rotate-180" : ""}`}
+                    />
+                  </button>
+                  {expandedFaq === 4 && (
+                    <div className="mt-2 p-5 bg-gray-50 dark:bg-gray-600 rounded-lg">
+                      <p className="text-gray-600 dark:text-gray-300">
+                        目前所有基础功能都是完全免费的，并且承诺永远不会收费。我们会持续优化现有功能以提供更好的体验。未来可能会推出一些高级功能，这些新增功能可能会采用收费模式，但不会影响现有免费功能的使用。
                       </p>
                     </div>
                   )}
@@ -756,4 +991,3 @@ export default function Home() {
     </div>
   )
 }
-

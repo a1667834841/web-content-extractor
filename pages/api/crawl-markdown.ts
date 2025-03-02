@@ -11,7 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!url) {
         return res.status(400).json({ error: "请提供URL" })
     }
-    console.log("提取内容", url)
+
+    console.log("提取Markdown内容", url)
 
     try {
         // 调用后端 API 获取 Markdown 内容
@@ -33,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
         res.status(200).send(data.markdown)
     } catch (error) {
-        console.error("提取内容失败:", error)
+        console.error("提取Markdown内容失败:", error)
         res.status(500).json({ error: "提取内容失败，请稍后再试" })
     }
-}
+} 
