@@ -26,6 +26,7 @@ import {
   Mail,
   ArrowUp,
   Clock,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { publicConfig, isDevelopment } from "../lib/config"
@@ -356,13 +357,23 @@ export default function Home() {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <LinkIcon className="h-5 w-5 text-gray-400" />
                       </div>
-                      <input
-                        type="text"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        placeholder="请输入网址 (例如: https://www.baidu.com)"
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                      />
+                      <div className="relative flex">
+                        <input
+                          type="text"
+                          value={url}
+                          onChange={(e) => setUrl(e.target.value)}
+                          placeholder="请输入网址 (例如: https://www.baidu.com)" 
+                          className="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        {url && (
+                          <button
+                            onClick={() => setUrl('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-row w-full sm:w-1/2 space-x-2">
                       <button className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out transform active:scale-95 dark:bg-blue-600 dark:hover:bg-blue-700 text-base sm:text-base text-sm ${loading ? "opacity-50 cursor-not-allowed" : ""}`} onClick={() => handleExtract(url, activeTab)}>
